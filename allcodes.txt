@@ -11993,6 +11993,708 @@ int main() {
 
     return 0;
 }
+1.WAP to convert a given Infix expression into its equivalent Postfix expression and evaluate it using stack.
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
+#define MAX 100
+
+typedef struct {
+    int top;
+    int items[MAX];
+} Stack;
+
+void initStack(Stack *s) {
+    s->top = -1;
+}
+
+int isEmpty(Stack *s) {
+    return s->top == -1;
+}
+
+int isFull(Stack *s) {
+    return s->top == MAX - 1;
+}
+
+void push(Stack *s, int value) {
+    if (isFull(s)) {
+        printf("Stack overflow\n");
+        exit(1);
+    }
+    s->items[++s->top] = value;
+}
+
+int pop(Stack *s) {
+    if (isEmpty(s)) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return s->items[s->top--];
+}
+
+int peek(Stack *s) {
+    if (isEmpty(s)) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return s->items[s->top];
+}
+
+int precedence(char op) {
+    switch (op) {
+        case '+':
+        case '-': return 1;
+        case '*':
+        case '/': return 2;
+        case '^': return 3;
+        default: return 0;
+    }
+}
+
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
+}
+
+void infixToPostfix(char infix[], char postfix[]) {
+    Stack s;
+    initStack(&s);
+    int j = 0;
+
+    for (int i = 0; infix[i] != '\0'; i++) {
+        char token = infix[i];
+
+        if (isspace(token)) {
+            continue;
+        }
+
+        if (isalnum(token)) {
+            postfix[j++] = token;
+        } else if (token == '(') {
+            push(&s, token);
+        } else if (token == ')') {
+            while (!isEmpty(&s) && peek(&s) != '(') {
+                postfix[j++] = pop(&s);
+            }
+            pop(&s); // remove '('
+        } else if (isOperator(token)) {
+            while (!isEmpty(&s) && precedence(peek(&s)) >= precedence(token)) {
+                postfix[j++] = pop(&s);
+            }
+            push(&s, token);
+        }
+    }
+
+    while (!isEmpty(&s)) {
+        postfix[j++] = pop(&s);
+    }
+
+    postfix[j] = '\0';
+}
+
+int main() {
+    char infix[MAX], postfix[MAX];
+    printf("Enter an infix expression: ");
+    fgets(infix, MAX, stdin);
+    infix[strcspn(infix, "\n")] = '\0'; 
+
+    infixToPostfix(infix, postfix);
+    printf("Postfix expression: %s\n", postfix);
+
+    return 0;
+}
+
+
+2. WAP to convert a given Infix expression into its equivalent Prefix expression and evaluate it using stack.
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct {
+    int top;
+    char items[MAX];
+} Stack;
+
+void initStack(Stack *s) {
+    s->top = -1;
+}
+
+int isEmpty(Stack *s) {
+    return s->top == -1;
+}
+
+int isFull(Stack *s) {
+    return s->top == MAX - 1;
+}
+
+void push(Stack *s, char value) {
+    if (isFull(s)) {
+        printf("Stack overflow\n");
+        exit(1);
+    }
+    s->items[++s->top] = value;
+}
+
+char pop(Stack *s) {
+    if (isEmpty(s)) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return s->items[s->top--];
+}
+
+char peek(Stack *s) {
+    if (isEmpty(s)) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return s->items[s->top];
+}
+
+int precedence(char op) {
+    switch (op) {
+        case '+':
+        case '-': return 1;
+        case '*':
+        case '/': return 2;
+        case '^': return 3;
+        default: return 0;
+    }
+}
+
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
+}
+
+void reverseString(char *exp) {
+    int length = strlen(exp);
+    for (int i = 0; i < length / 2; i++) {
+        char temp = exp[i];
+        exp[i] = exp[length - i - 1];
+        exp[length - i - 1] = temp;
+    }
+}
+
+void replaceParentheses(char *exp) {
+    for (int i = 0; exp[i] != '\0'; i++) {
+        if (exp[i] == '(') {
+            exp[i] = ')';
+        } else if (exp[i] == ')') {
+            exp[i] = '(';
+        }
+    }
+}
+
+void infixToPrefix(char infix[], char prefix[]) {
+    Stack s;
+    initStack(&s);
+    reverseString(infix);
+    replaceParentheses(infix);
+
+    int j = 0;
+    for (int i = 0; infix[i] != '\0'; i++) {
+        char token = infix[i];
+
+        if (isspace(token)) {
+            continue;
+        }
+
+        if (isalnum(token)) {
+            prefix[j++] = token;
+        } else if (token == '(') {
+            push(&s, token);
+        } else if (token == ')') {
+            while (!isEmpty(&s) && peek(&s) != '(') {
+                prefix[j++] = pop(&s);
+            }
+            pop(&s); // remove '('
+        } else if (isOperator(token)) {
+            while (!isEmpty(&s) && precedence(peek(&s)) > precedence(token)) {
+                prefix[j++] = pop(&s);
+            }
+            push(&s, token);
+        }
+    }
+
+    while (!isEmpty(&s)) {
+        prefix[j++] = pop(&s);
+    }
+
+    prefix[j] = '\0';
+    reverseString(prefix);
+}
+
+int main() {
+    char infix[MAX], prefix[MAX];
+    printf("Enter an infix expression: ");
+    fgets(infix, MAX, stdin);
+    infix[strcspn(infix, "\n")] = '\0'; 
+
+    infixToPrefix(infix, prefix);
+    printf("Prefix expression: %s\n", prefix);
+
+    return 0;
+}
+
+
+
+4. WAP to implement following by using stack. A. Factorial of a given number B. Generation of Fibonacci series
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+typedef struct {
+    int top;
+    int items[MAX];
+} Stack;
+
+void initStack(Stack *s) {
+    s->top = -1;
+}
+
+int isEmpty(Stack *s) {
+    return s->top == -1;
+}
+
+int isFull(Stack *s) {
+    return s->top == MAX - 1;
+}
+
+void push(Stack *s, int value) {
+    if (isFull(s)) {
+        printf("Stack overflow\n");
+        exit(1);
+    }
+    s->items[++s->top] = value;
+}
+
+int pop(Stack *s) {
+    if (isEmpty(s)) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return s->items[s->top--];
+}
+
+int factorial(int n) {
+    Stack s;
+    initStack(&s);
+    int result = 1;
+
+    for (int i = n; i > 1; i--) {
+        push(&s, i);
+    }
+
+    while (!isEmpty(&s)) {
+        result *= pop(&s);
+    }
+
+    return result;
+}
+
+void generateFibonacci(int n) {
+    Stack s;
+    initStack(&s);
+
+    if (n < 1) {
+        printf("The number of terms must be at least 1.\n");
+        return;
+    }
+
+    push(&s, 0);
+    if (n > 1) {
+        push(&s, 1);
+    }
+
+    for (int i = 2; i < n; i++) {
+        int a = pop(&s);
+        int b = pop(&s);
+        int next = a + b;
+        push(&s, b);
+        push(&s, a);
+        push(&s, next);
+    }
+
+    printf("Fibonacci series up to %d terms: ", n);
+    while (!isEmpty(&s)) {
+        printf("%d ", pop(&s));
+    }
+    printf("\n");
+}
+
+int main() {
+    int choice, number, terms;
+
+    while (1) {
+        printf("\n1. Factorial of a given number\n2. Generation of Fibonacci series\n3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter a number to find its factorial: ");
+                scanf("%d", &number);
+
+                if (number < 0) {
+                    printf("Factorial is not defined for negative numbers.\n");
+                } else {
+                    int result = factorial(number);
+                    printf("Factorial of %d is %d\n", number, result);
+                }
+                break;
+
+            case 2:
+                printf("Enter the number of terms for the Fibonacci series: ");
+                scanf("%d", &terms);
+
+                generateFibonacci(terms);
+                break;
+
+            case 3:
+                exit(0);
+
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+
+    return 0;
+}
+
+
+
+7. WAP to perform addition of two polynomials using singly linked list.
+#include <stdio.h>
+#include <stdlib.h>
+
+struct poly
+{
+    int coeff;
+    int exp;
+    struct poly *next;
+};
+
+struct poly* add(struct poly *p1, struct poly *p2)
+{
+    struct poly *head3 = NULL, *p3 = NULL; 
+    while(p1 != NULL && p2 != NULL)
+    {
+        if (head3 == NULL)
+        {
+            head3 = p3 = (struct poly*)malloc(sizeof(struct poly));
+            p3->next = NULL;
+        }
+        else
+        {
+            p3->next = (struct poly*)malloc(sizeof(struct poly));
+            p3 = p3->next;
+            p3->next = NULL;
+        }
+
+        if(p1->exp == p2->exp)
+        {
+            p3->coeff = p1->coeff + p2->coeff;
+            p3->exp = p1->exp;
+            p1 = p1->next;
+            p2 = p2->next;
+        }
+        else if(p1->exp > p2->exp)
+        {
+            p3->coeff = p1->coeff;
+            p3->exp = p1->exp;
+            p1 = p1->next;
+        }
+        else
+        {
+            p3->coeff = p2->coeff;
+            p3->exp = p2->exp;
+            p2 = p2->next;
+        }
+    }
+
+    while(p1 != NULL)
+    {
+        p3->next = (struct poly*)malloc(sizeof(struct poly));
+        p3 = p3->next;
+        p3->coeff = p1->coeff;
+        p3->exp = p1->exp;
+        p1 = p1->next;
+        p3->next = NULL;
+    }
+
+    while(p2 != NULL)
+    {
+        p3->next = (struct poly*)malloc(sizeof(struct poly));
+        p3 = p3->next;
+        p3->coeff = p2->coeff;
+        p3->exp = p2->exp;
+        p2 = p2->next;
+        p3->next = NULL;
+    }
+
+    return head3;
+}
+
+struct poly* accept_poly(int n)
+{
+    struct poly *head, *p;
+    int i;
+    head = p = (struct poly*)malloc(sizeof(struct poly));
+    p->next = NULL;
+    printf("Enter coefficients with exponents:\n");
+    scanf("%d %d", &p->coeff, &p->exp);
+
+    for(i = 1; i < n; i++)
+    {
+        p->next = (struct poly*)malloc(sizeof(struct poly));
+        p = p->next;
+        p->next = NULL;
+        scanf("%d %d", &p->coeff, &p->exp);
+    }
+    return head;
+}
+
+void print_poly(struct poly *p)
+{
+    while(p != NULL)
+    {
+        printf("%dx^%d ", p->coeff, p->exp);
+        if (p->next != NULL)
+            printf("+ ");
+        p = p->next;
+    }
+    printf("\n");
+}
+
+int main()
+{
+    struct poly *poly1, *poly2, *poly3;
+    int n1, n2;
+
+    printf("Enter no. of terms in each polynomial: ");
+    scanf("%d %d", &n1, &n2);
+    
+    poly1 = accept_poly(n1);
+    print_poly(poly1);
+    poly2 = accept_poly(n2);
+    
+    print_poly(poly2);
+
+    poly3 = add(poly1, poly2);
+
+    printf("Resultant polynomial after addition: ");
+    print_poly(poly3);
+    
+    free(poly1);
+    free(poly2);
+    free(poly3);
+
+    return 0;
+}
+
+
+
+9. WAP to create doubly linked list and perform following operations on it. A) Insert (all cases) 2. Delete (all cases).
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node* prev;
+    struct Node* next;
+} Node;
+
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    if (newNode == NULL) {
+        printf("Memory allocation error\n");
+        exit(1);
+    }
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    return newNode;
+}
+
+void insertAtBeginning(Node** head, int data) {
+    Node* newNode = createNode(data);
+    if (*head == NULL) {
+        *head = newNode;
+        return;
+    }
+    newNode->next = *head;
+    (*head)->prev = newNode;
+    *head = newNode;
+}
+
+void insertAtEnd(Node** head, int data) {
+    Node* newNode = createNode(data);
+    if (*head == NULL) {
+        *head = newNode;
+        return;
+    }
+    Node* temp = *head;
+    while (temp->next != NULL) {
+        temp = temp->next;
+    }
+    temp->next = newNode;
+    newNode->prev = temp;
+}
+
+void insertAfter(Node* prevNode, int data) {
+    if (prevNode == NULL) {
+        printf("Previous node cannot be NULL\n");
+        return;
+    }
+    Node* newNode = createNode(data);
+    newNode->next = prevNode->next;
+    if (prevNode->next != NULL) {
+        prevNode->next->prev = newNode;
+    }
+    prevNode->next = newNode;
+    newNode->prev = prevNode;
+}
+
+void deleteNode(Node** head, Node* delNode) {
+    if (*head == NULL || delNode == NULL) {
+        printf("List is empty or node to be deleted is NULL\n");
+        return;
+    }
+    if (*head == delNode) {
+        *head = delNode->next;
+    }
+    if (delNode->next != NULL) {
+        delNode->next->prev = delNode->prev;
+    }
+    if (delNode->prev != NULL) {
+        delNode->prev->next = delNode->next;
+    }
+    free(delNode);
+}
+
+void deleteFromBeginning(Node** head) {
+    if (*head == NULL) {
+        printf("List is empty, cannot delete\n");
+        return;
+    }
+    deleteNode(head, *head);
+}
+
+void deleteFromEnd(Node** head) {
+    if (*head == NULL) {
+        printf("List is empty, cannot delete\n");
+        return;
+    }
+    Node* temp = *head;
+    while (temp->next != NULL) {
+        temp = temp->next;
+    }
+    deleteNode(head, temp);
+}
+
+void display(Node* head) {
+    if (head == NULL) {
+        printf("List is empty\n");
+        return;
+    }
+    Node* temp = head;
+    while (temp != NULL) {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+int getIntInput() {
+    int value;
+    while (scanf("%d", &value) != 1) {
+        while (getchar() != '\n'); // Clear invalid input
+        printf("Invalid input. Please enter an integer: ");
+    }
+    return value;
+}
+
+int main() {
+    Node* head = NULL;
+
+    int choice, data, position;
+    Node* temp;
+
+    while (1) {
+        printf("1. Insert at beginning\n");
+        printf("2. Insert at end\n");
+        printf("3. Insert after a node\n");
+        printf("4. Delete from beginning\n");
+        printf("5. Delete from end\n");
+        printf("6. Delete a specific node\n");
+        printf("7. Display list\n");
+        printf("8. Exit\n");
+        printf("Enter your choice: ");
+        choice = getIntInput();
+
+        switch (choice) {
+            case 1:
+                printf("Enter data to insert at the beginning: ");
+                data = getIntInput();
+                insertAtBeginning(&head, data);
+                break;
+            case 2:
+                printf("Enter data to insert at the end: ");
+                data = getIntInput();
+                insertAtEnd(&head, data);
+                break;
+            case 3:
+                printf("Enter data to insert: ");
+                data = getIntInput();
+                printf("Enter the data of the node after which to insert: ");
+                position = getIntInput();
+                temp = head;
+                while (temp != NULL && temp->data != position) {
+                    temp = temp->next;
+                }
+                if (temp == NULL) {
+                    printf("Node with given data not found\n");
+                } else {
+                    insertAfter(temp, data);
+                }
+                break;
+            case 4:
+                deleteFromBeginning(&head);
+                break;
+            case 5:
+                deleteFromEnd(&head);
+                break;
+            case 6:
+                printf("Enter the data of the node to delete: ");
+                data = getIntInput();
+                temp = head;
+                while (temp != NULL && temp->data != data) {
+                    temp = temp->next;
+                }
+                if (temp == NULL) {
+                    printf("Node with given data not found\n");
+                } else {
+                    deleteNode(&head, temp);
+                }
+                break;
+            case 7:
+                display(head);
+                break;
+            case 8:
+                exit(0);
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+
+    return 0;
+}
 
 
