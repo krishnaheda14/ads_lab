@@ -12693,7 +12693,709 @@ int main() {
                 printf("Invalid choice\n");
         }
     }
+10. WAP to merge two sorted Doubly linked lists and display their result.
+#include <stdio.h>
+#include <stdlib.h>
 
+// Definition of the doubly linked list node
+struct Node {
+    int data;
+    struct Node* next;
+    struct Node* prev;
+};
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+    return newNode;
+}
+
+// Function to insert a node at the end of the doubly linked list
+void insertEnd(struct Node** head, int data) {
+    struct Node* newNode = createNode(data);
+    if (*head == NULL) {
+        *head = newNode;
+        return;
+    }
+    struct Node* temp = *head;
+    while (temp->next != NULL) {
+        temp = temp->next;
+    }
+    temp->next = newNode;
+    newNode->prev = temp;
+}
+
+// Function to merge two sorted doubly linked lists
+struct Node* mergeLists(struct Node* head1, struct Node* head2) {
+    struct Node* mergedHead = NULL;
+    struct Node* tail = NULL;
+
+    while (head1 != NULL && head2 != NULL) {
+        if (head1->data <= head2->data) {
+            if (mergedHead == NULL) {
+                mergedHead = head1;
+                tail = head1;
+                head1 = head1->next;
+            } else {
+                tail->next = head1;
+                head1->prev = tail;
+                tail = head1;
+                head1 = head1->next;
+            }
+        } else {
+            if (mergedHead == NULL) {
+                mergedHead = head2;
+                tail = head2;
+                head2 = head2->next;
+            } else {
+                tail->next = head2;
+                head2->prev = tail;
+                tail = head2;
+                head2 = head2->next;
+            }
+        }
+    }
+
+    while (head1 != NULL) {
+        tail->next = head1;
+        head1->prev = tail;
+        tail = head1;
+        head1 = head1->next;
+    }
+
+    while (head2 != NULL) {
+        tail->next = head2;
+        head2->prev = tail;
+        tail = head2;
+        head2 = head2->next;
+    }
+
+    return mergedHead;
+}
+
+// Function to print the doubly linked list
+void printList(struct Node* head) {
+    struct Node* temp = head;
+    while (temp != NULL) {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+// Main function to demonstrate the merging of two sorted doubly linked lists
+int main() {
+    int n1, n2, data;
+    struct Node* head1 = NULL;
+    struct Node* head2 = NULL;
+
+    printf("Enter the number of elements in the first sorted doubly linked list: ");
+    scanf("%d", &n1);
+    printf("Enter the elements of the first sorted doubly linked list:\n");
+    for (int i = 0; i < n1; i++) {
+        scanf("%d", &data);
+        insertEnd(&head1, data);
+    }
+
+    printf("Enter the number of elements in the second sorted doubly linked list: ");
+    scanf("%d", &n2);
+    printf("Enter the elements of the second sorted doubly linked list:\n");
+    for (int i = 0; i < n2; i++) {
+        scanf("%d", &data);
+        insertEnd(&head2, data);
+    }
+
+    struct Node* mergedHead = mergeLists(head1, head2);
+
+    printf("Merged doubly linked list:\n");
+    printList(mergedHead);
+
+    return 0;
+}
+
+
+11.Implement Push and POP operations of STACK on Doubly linked lists
+#include <stdio.h>
+#include <stdlib.h>
+
+// Definition of the doubly linked list node
+struct Node {
+    int data;
+    struct Node* next;
+    struct Node* prev;
+};
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+    return newNode;
+}
+
+// Function to push an element onto the stack
+void push(struct Node** head, int data) {
+    struct Node* newNode = createNode(data);
+    if (*head == NULL) {
+        *head = newNode;
+    } else {
+        newNode->next = *head;
+        (*head)->prev = newNode;
+        *head = newNode;
+    }
+    printf("Pushed %d onto the stack.\n", data);
+}
+
+// Function to pop an element from the stack
+int pop(struct Node** head) {
+    if (*head == NULL) {
+        printf("Stack underflow.\n");
+        return -1;
+    }
+    struct Node* temp = *head;
+    int poppedData = temp->data;
+    *head = (*head)->next;
+    if (*head != NULL) {
+        (*head)->prev = NULL;
+    }
+    free(temp);
+    printf("Popped %d from the stack.\n", poppedData);
+    return poppedData;
+}
+
+// Function to display the stack
+void display(struct Node* head) {
+    struct Node* temp = head;
+    if (head == NULL) {
+        printf("Stack is empty.\n");
+        return;
+    }
+    printf("Stack elements are: ");
+    while (temp != NULL) {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+// Main function to demonstrate stack operations
+int main() {
+    struct Node* stack = NULL;
+    int choice, data;
+
+    while (1) {
+        printf("\nStack Operations:\n");
+        printf("1. Push\n");
+        printf("2. Pop\n");
+        printf("3. Display\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter data to push onto the stack: ");
+                scanf("%d", &data);
+                push(&stack, data);
+                break;
+            case 2:
+                pop(&stack);
+                break;
+            case 3:
+                display(stack);
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+
+12.Implement ADD and DELETE operations of QUEUE on Doubly linked lists
+#include <stdio.h>
+#include <stdlib.h>
+
+// Definition of the doubly linked list node
+struct Node {
+    int data;
+    struct Node* next;
+    struct Node* prev;
+};
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+    return newNode;
+}
+
+// Function to add an element to the queue
+void add(struct Node** front, struct Node** rear, int data) {
+    struct Node* newNode = createNode(data);
+    if (*rear == NULL) {
+        *front = *rear = newNode;
+    } else {
+        (*rear)->next = newNode;
+        newNode->prev = *rear;
+        *rear = newNode;
+    }
+    printf("Added %d to the queue.\n", data);
+}
+
+// Function to delete an element from the queue
+int del(struct Node** front, struct Node** rear) {
+    if (*front == NULL) {
+        printf("Queue underflow.\n");
+        return -1;
+    }
+    struct Node* temp = *front;
+    int deletedData = temp->data;
+    *front = (*front)->next;
+    if (*front == NULL) {
+        *rear = NULL;
+    } else {
+        (*front)->prev = NULL;
+    }
+    free(temp);
+    printf("Deleted %d from the queue.\n", deletedData);
+    return deletedData;
+}
+
+// Function to display the queue
+void display(struct Node* front) {
+    struct Node* temp = front;
+    if (front == NULL) {
+        printf("Queue is empty.\n");
+        return;
+    }
+    printf("Queue elements are: ");
+    while (temp != NULL) {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+// Main function to demonstrate queue operations
+int main() {
+    struct Node* front = NULL;
+    struct Node* rear = NULL;
+    int choice, data;
+
+    while (1) {
+        printf("\nQueue Operations:\n");
+        printf("1. Add\n");
+        printf("2. Delete\n");
+        printf("3. Display\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter data to add to the queue: ");
+                scanf("%d", &data);
+                add(&front, &rear, data);
+                break;
+            case 2:
+                del(&front, &rear);
+                break;
+            case 3:
+                display(front);
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+
+27.Write a Program to create Inorder Threaded Binary Tree and Traverse it in Preorder way.
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for the Inorder Threaded Binary Tree
+typedef struct TBTNode {
+    int data;
+    struct TBTNode *left, *right;
+    int ltag, rtag; // Tags to indicate if left and right pointers are threads
+} TBTNode;
+
+// Function to create a new node
+TBTNode* createNode(int data) {
+    TBTNode* newNode = (TBTNode*)malloc(sizeof(TBTNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    newNode->ltag = 1;
+    newNode->rtag = 1;
+    return newNode;
+}
+
+// Function to insert a node in the Inorder Threaded Binary Tree
+TBTNode* insertNode(TBTNode* root, int data) {
+    TBTNode *ptr = root, *parent = NULL;
+
+    // Find the position where the new node will be inserted
+    while (ptr != NULL) {
+        if (data == ptr->data) {
+            printf("Duplicate data not allowed.\n");
+            return root;
+        }
+        parent = ptr;
+        if (data < ptr->data) {
+            if (ptr->ltag == 0)
+                ptr = ptr->left;
+            else
+                break;
+        } else {
+            if (ptr->rtag == 0)
+                ptr = ptr->right;
+            else
+                break;
+        }
+    }
+
+    // Create the new node
+    TBTNode* newNode = createNode(data);
+
+    if (parent == NULL) {
+        root = newNode;
+        newNode->left = NULL;
+        newNode->right = NULL;
+    } else if (data < parent->data) {
+        newNode->left = parent->left;
+        newNode->right = parent;
+        parent->ltag = 0;
+        parent->left = newNode;
+    } else {
+        newNode->right = parent->right;
+        newNode->left = parent;
+        parent->rtag = 0;
+        parent->right = newNode;
+    }
+
+    return root;
+}
+
+// Function to find the next node in preorder traversal
+TBTNode* preorderSuccessor(TBTNode* node) {
+    if (node->ltag == 0)
+        return node->left;
+    while (node->rtag == 1 && node->right != NULL)
+        node = node->right;
+    return node->right;
+}
+
+// Function to perform preorder traversal of the Inorder Threaded Binary Tree
+void preorderTraversal(TBTNode* root) {
+    if (root == NULL)
+        return;
+
+    TBTNode* cur = root;
+    while (cur != NULL) {
+        printf("%d ", cur->data);
+        cur = preorderSuccessor(cur);
+    }
+}
+
+// Main function to execute the program
+int main() {
+    TBTNode* root = NULL;
+
+    int n, data;
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        printf("Enter data for node %d: ", i + 1);
+        scanf("%d", &data);
+        root = insertNode(root, data);
+    }
+
+    printf("Preorder traversal of the Inorder Threaded Binary Tree:\n");
+    preorderTraversal(root);
+
+    return 0;
+}
+
+
+
+
+28.Write a Program to create Inorder Threaded Binary Tree and Traverse it in Inorder way.
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for the Inorder Threaded Binary Tree
+typedef struct TBTNode {
+    int data;
+    struct TBTNode *left, *right;
+    int ltag, rtag; // Tags to indicate if left and right pointers are threads
+} TBTNode;
+
+// Function to create a new node
+TBTNode* createNode(int data) {
+    TBTNode* newNode = (TBTNode*)malloc(sizeof(TBTNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    newNode->ltag = 1;
+    newNode->rtag = 1;
+    return newNode;
+}
+
+// Function to insert a node in the Inorder Threaded Binary Tree
+TBTNode* insertNode(TBTNode* root, int data) {
+    TBTNode *ptr = root, *parent = NULL;
+
+    // Find the position where the new node will be inserted
+    while (ptr != NULL) {
+        if (data == ptr->data) {
+            printf("Duplicate data not allowed.\n");
+            return root;
+        }
+        parent = ptr;
+        if (data < ptr->data) {
+            if (ptr->ltag == 0)
+                ptr = ptr->left;
+            else
+                break;
+        } else {
+            if (ptr->rtag == 0)
+                ptr = ptr->right;
+            else
+                break;
+        }
+    }
+
+    // Create the new node
+    TBTNode* newNode = createNode(data);
+
+    if (parent == NULL) {
+        root = newNode;
+        newNode->left = NULL;
+        newNode->right = NULL;
+    } else if (data < parent->data) {
+        newNode->left = parent->left;
+        newNode->right = parent;
+        parent->ltag = 0;
+        parent->left = newNode;
+    } else {
+        newNode->right = parent->right;
+        newNode->left = parent;
+        parent->rtag = 0;
+        parent->right = newNode;
+    }
+
+    return root;
+}
+
+// Function to find the leftmost node in a tree/subtree
+TBTNode* leftmost(TBTNode* node) {
+    while (node != NULL && node->ltag == 0)
+        node = node->left;
+    return node;
+}
+
+// Function to perform inorder traversal of the Inorder Threaded Binary Tree
+void inorderTraversal(TBTNode* root) {
+    TBTNode* cur = leftmost(root);
+
+    while (cur != NULL) {
+        printf("%d ", cur->data);
+
+        if (cur->rtag == 1)
+            cur = cur->right;
+        else
+            cur = leftmost(cur->right);
+    }
+}
+
+// Main function to execute the program
+int main() {
+    TBTNode* root = NULL;
+
+    int n, data;
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        printf("Enter data for node %d: ", i + 1);
+        scanf("%d", &data);
+        root = insertNode(root, data);
+    }
+
+    printf("Inorder traversal of the Inorder Threaded Binary Tree:\n");
+    inorderTraversal(root);
+
+    return 0;
+}
+
+
+
+29.Write a Program to implement AVL tree and perform different rotations on it and display it Levelwise.
+#include <stdio.h>
+#include <stdlib.h>
+
+// AVL Tree Node structure
+typedef struct AVLNode {
+    int data;
+    struct AVLNode* left;
+    struct AVLNode* right;
+    int height;
+} AVLNode;
+
+// Function to create a new AVL node
+AVLNode* createNode(int data) {
+    AVLNode* newNode = (AVLNode*)malloc(sizeof(AVLNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    newNode->height = 1; // New node is initially added at leaf
+    return newNode;
+}
+
+// Function to get the height of the tree
+int height(AVLNode* node) {
+    if (node == NULL)
+        return 0;
+    return node->height;
+}
+
+// Function to find the maximum of two integers
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+// Function to get the balance factor of the node
+int getBalance(AVLNode* node) {
+    if (node == NULL)
+        return 0;
+    return height(node->left) - height(node->right);
+}
+
+// Right rotate subtree rooted with y
+AVLNode* rightRotate(AVLNode* y) {
+    AVLNode* x = y->left;
+    AVLNode* T2 = x->right;
+
+    x->right = y;
+    y->left = T2;
+
+    y->height = max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
+
+    return x; // New root
+}
+
+// Left rotate subtree rooted with x
+AVLNode* leftRotate(AVLNode* x) {
+    AVLNode* y = x->right;
+    AVLNode* T2 = y->left;
+
+    y->left = x;
+    x->right = T2;
+
+    x->height = max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
+
+    return y; // New root
+}
+
+// Function to insert a node in AVL tree and perform rotations if necessary
+AVLNode* insertNode(AVLNode* node, int data) {
+    if (node == NULL)
+        return createNode(data);
+
+    if (data < node->data)
+        node->left = insertNode(node->left, data);
+    else if (data > node->data)
+        node->right = insertNode(node->right, data);
+    else
+        return node; // Equal keys are not allowed in BST
+
+    node->height = 1 + max(height(node->left), height(node->right));
+
+    int balance = getBalance(node);
+
+    // Left Left Case
+    if (balance > 1 && data < node->left->data)
+        return rightRotate(node);
+
+    // Right Right Case
+    if (balance < -1 && data > node->right->data)
+        return leftRotate(node);
+
+    // Left Right Case
+    if (balance > 1 && data > node->left->data) {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+
+    // Right Left Case
+    if (balance < -1 && data < node->right->data) {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+
+// Function to print level order traversal of the AVL tree
+void printLevelOrder(AVLNode* root) {
+    if (root == NULL)
+        return;
+
+    int height = root->height;
+    for (int i = 1; i <= height; i++) {
+        printCurrentLevel(root, i);
+        printf("\n");
+    }
+}
+
+void printCurrentLevel(AVLNode* root, int level) {
+    if (root == NULL)
+        return;
+    if (level == 1)
+        printf("%d ", root->data);
+    else if (level > 1) {
+        printCurrentLevel(root->left, level - 1);
+        printCurrentLevel(root->right, level - 1);
+    }
+}
+
+// Main function to execute the program
+int main() {
+    AVLNode* root = NULL;
+
+    int n, data;
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        printf("Enter data for node %d: ", i + 1);
+        scanf("%d", &data);
+        root = insertNode(root, data);
+    }
+
+    printf("Level-wise traversal of the AVL tree:\n");
+    printLevelOrder(root);
+
+    return 0;
+}
     return 0;
 }
 
