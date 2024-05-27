@@ -1,0 +1,1225 @@
+Write a program to illustrate operations on a BST holding numeric keys. The menu must include: • Insert • Mirror Image       • Find • Height of the tree
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Definition of the node structure
+struct Node {
+    int key;
+    struct Node* left;
+    struct Node* right;
+};
+
+// Function to create a new node
+struct Node* createNode(int key) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->key = key;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert a key into the BST
+struct Node* insert(struct Node* node, int key) {
+    if (node == NULL)
+        return createNode(key);
+
+    if (key < node->key)
+        node->left = insert(node->left, key);
+    else if (key > node->key)
+        node->right = insert(node->right, key);
+
+    return node;
+}
+
+// Function to create the mirror image of the BST
+void mirror(struct Node* node) {
+    if (node == NULL)
+        return;
+
+    struct Node* temp = node->left;
+    node->left = node->right;
+    node->right = temp;
+
+    mirror(node->left);
+    mirror(node->right);
+}
+
+// Function to find a key in the BST
+struct Node* find(struct Node* node, int key) {
+    if (node == NULL || node->key == key)
+        return node;
+
+    if (key < node->key)
+        return find(node->left, key);
+    else
+        return find(node->right, key);
+}
+
+// Function to get the height of the BST
+int height(struct Node* node) {
+    if (node == NULL)
+        return 0;
+    else {
+        int leftHeight = height(node->left);
+        int rightHeight = height(node->right);
+        return (leftHeight > rightHeight) ? (leftHeight + 1) : (rightHeight + 1);
+    }
+}
+
+// Function to display the menu
+void displayMenu() {
+    printf("\nMenu:\n");
+    printf("1. Insert\n");
+    printf("2. Mirror Image\n");
+    printf("3. Find\n");
+    printf("4. Height of the tree\n");
+    printf("5. Exit\n");
+    printf("Enter your choice: ");
+}
+
+// Function to perform in-order traversal of the BST
+void inOrderTraversal(struct Node* root) {
+    if (root != NULL) {
+        inOrderTraversal(root->left);
+        printf("%d ", root->key);
+        inOrderTraversal(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int choice, key, numElements;
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the number of elements to insert: ");
+                scanf("%d", &numElements);
+                printf("Enter %d keys to insert:\n", numElements);
+                for (int i = 0; i < numElements; i++) {
+                    scanf("%d", &key);
+                    root = insert(root, key);
+                }
+                break;
+            case 2:
+                mirror(root);
+                printf("Mirror image of the tree:\n");
+                inOrderTraversal(root);
+                printf("\n");
+                mirror(root); // Restore the original tree
+                break;
+            case 3:
+                printf("Enter key to find: ");
+                scanf("%d", &key);
+                if (find(root, key) != NULL)
+                    printf("Key %d found in the tree.\n", key);
+                else
+                    printf("Key %d not found in the tree.\n", key);
+                break;
+            case 4:
+                printf("Height of the tree: %d\n", height(root));
+                break;
+            case 5:
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+ 
+ 
+ 
+ 
+
+
+Write a Program to create a Binary Tree and perform following Non-recursive operations on it. a. Postorder Traversal  c. Display Leaf Nodes d. Mirror Image
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure of a binary tree node
+struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+// Structure of a stack node (used for non-recursive traversal)
+struct StackNode {
+    struct TreeNode* treeNode;
+    struct StackNode* next;
+};
+
+// Function to create a new tree node
+struct TreeNode* createNode(int data) {
+    struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to push a tree node onto the stack
+void push(struct StackNode** top, struct TreeNode* treeNode) {
+    struct StackNode* newNode = (struct StackNode*)malloc(sizeof(struct StackNode));
+    newNode->treeNode = treeNode;
+    newNode->next = *top;
+    *top = newNode;
+}
+
+// Function to pop a tree node from the stack
+struct TreeNode* pop(struct StackNode** top) {
+    if (*top == NULL)
+        return NULL;
+    struct TreeNode* poppedNode = (*top)->treeNode;
+    struct StackNode* temp = *top;
+    *top = (*top)->next;
+    free(temp);
+    return poppedNode;
+}
+
+// Function to perform postorder traversal iteratively
+void postOrderTraversal(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    struct StackNode* stack = NULL;
+    struct TreeNode* currNode = root;
+    struct TreeNode* lastVisited = NULL;
+
+    while (currNode || stack) {
+        if (currNode) {
+            push(&stack, currNode);
+            currNode = currNode->left;
+        } else {
+            struct TreeNode* peekNode = stack->treeNode;
+            if (peekNode->right && lastVisited != peekNode->right) {
+                currNode = peekNode->right;
+            } else {
+                printf("%d ", peekNode->data);
+                lastVisited = pop(&stack);
+            }
+        }
+    }
+}
+
+// Function to display leaf nodes of the tree
+void displayLeafNodes(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    struct StackNode* stack = NULL;
+    struct TreeNode* currNode = root;
+
+    while (currNode || stack) {
+        if (currNode) {
+            push(&stack, currNode);
+            currNode = currNode->left;
+        } else {
+            struct TreeNode* peekNode = stack->treeNode;
+            if (peekNode->right == NULL && peekNode->left == NULL) {
+                printf("%d ", peekNode->data);
+            }
+            pop(&stack);
+            currNode = peekNode->right;
+        }
+    }
+}
+
+// Function to create the mirror image of the tree
+void mirrorImage(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    // Recursively mirror the left and right subtrees
+    mirrorImage(root->left);
+    mirrorImage(root->right);
+
+    // Swap left and right children of current node
+    struct TreeNode* temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+}
+
+// Function to display the menu
+void displayMenu() {
+    printf("\nMenu:\n");
+    printf("1. Postorder Traversal\n");
+    printf("2. Display Leaf Nodes\n");
+    printf("3. Mirror Image\n");
+    printf("4. Exit\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    struct TreeNode* root = NULL;
+    int choice, numElements, data;
+
+    // Input number of elements and their values
+    printf("Enter the number of elements to insert: ");
+    scanf("%d", &numElements);
+    printf("Enter %d elements to create the binary tree:\n", numElements);
+    for (int i = 0; i < numElements; i++) {
+        scanf("%d", &data);
+        if (root == NULL) {
+            root = createNode(data);
+        } else {
+            struct TreeNode* currentNode = root;
+            while (1) {
+                if (data <= currentNode->data) {
+                    if (currentNode->left == NULL) {
+                        currentNode->left = createNode(data);
+                        break;
+                    } else {
+                        currentNode = currentNode->left;
+                    }
+                } else {
+                    if (currentNode->right == NULL) {
+                        currentNode->right = createNode(data);
+                        break;
+                    } else {
+                        currentNode = currentNode->right;
+                    }
+                }
+            }
+        }
+    }
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Postorder Traversal: ");
+                postOrderTraversal(root);
+                printf("\n");
+                break;
+            case 2:
+                printf("Leaf Nodes: ");
+                displayLeafNodes(root);
+                printf("\n");
+                break;
+            case 3:
+                printf("Mirror Image:\n");
+                mirrorImage(root);
+                postOrderTraversal(root);
+                printf("\n");
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+ 
+ 
+
+Write a Program to create a Binary Search Tree and perform following non-recursive operations on it. a. Inorder Traversal b. Display Number of Leaf Nodes c. Mirror Image
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure of a binary tree node
+struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+// Structure of a stack node (used for non-recursive traversal)
+struct StackNode {
+    struct TreeNode* treeNode;
+    struct StackNode* next;
+};
+
+// Function to create a new tree node
+struct TreeNode* createNode(int data) {
+    struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to push a tree node onto the stack
+void push(struct StackNode** top, struct TreeNode* treeNode) {
+    struct StackNode* newNode = (struct StackNode*)malloc(sizeof(struct StackNode));
+    newNode->treeNode = treeNode;
+    newNode->next = *top;
+    *top = newNode;
+}
+
+// Function to pop a tree node from the stack
+struct TreeNode* pop(struct StackNode** top) {
+    if (*top == NULL)
+        return NULL;
+    struct TreeNode* poppedNode = (*top)->treeNode;
+    struct StackNode* temp = *top;
+    *top = (*top)->next;
+    free(temp);
+    return poppedNode;
+}
+
+// Function to perform inorder traversal iteratively
+void inOrderTraversal(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    struct StackNode* stack = NULL;
+    struct TreeNode* currNode = root;
+
+    while (currNode || stack) {
+        while (currNode) {
+            push(&stack, currNode);
+            currNode = currNode->left;
+        }
+        currNode = pop(&stack);
+        printf("%d ", currNode->data);
+        currNode = currNode->right;
+    }
+}
+
+// Function to count the number of leaf nodes in the tree
+int countLeafNodes(struct TreeNode* root) {
+    if (root == NULL)
+        return 0;
+
+    int leafCount = 0;
+    struct StackNode* stack = NULL;
+    struct TreeNode* currNode = root;
+
+    while (currNode || stack) {
+        while (currNode) {
+            push(&stack, currNode);
+            currNode = currNode->left;
+        }
+        currNode = pop(&stack);
+        if (currNode->left == NULL && currNode->right == NULL)
+            leafCount++;
+        currNode = currNode->right;
+    }
+
+    return leafCount;
+}
+
+// Function to create the mirror image of the tree
+void mirrorImage(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    // Iteratively mirror the left and right subtrees using stack
+    struct StackNode* stack = NULL;
+    push(&stack, root);
+
+    while (stack) {
+        struct TreeNode* currNode = pop(&stack);
+        // Swap left and right children of the current node
+        struct TreeNode* temp = currNode->left;
+        currNode->left = currNode->right;
+        currNode->right = temp;
+
+        if (currNode->left)
+            push(&stack, currNode->left);
+        if (currNode->right)
+            push(&stack, currNode->right);
+    }
+}
+
+// Function to display the menu
+void displayMenu() {
+    printf("\nMenu:\n");
+    printf("1. Inorder Traversal\n");
+    printf("2. Display Number of Leaf Nodes\n");
+    printf("3. Mirror Image\n");
+    printf("4. Exit\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    struct TreeNode* root = NULL;
+    int choice, numElements, data;
+
+    // Input number of elements
+    printf("Enter the number of elements to insert: ");
+    scanf("%d", &numElements);
+
+    // Input values to create the binary tree
+    printf("Enter the elements to create the Binary Search Tree:\n");
+    for (int i = 0; i < numElements; i++) {
+        scanf("%d", &data);
+        if (root == NULL) {
+            root = createNode(data);
+        } else {
+            struct TreeNode* currentNode = root;
+            while (1) {
+                if (data < currentNode->data) {
+                    if (currentNode->left == NULL) {
+                        currentNode->left = createNode(data);
+                        break;
+                    } else {
+                        currentNode = currentNode->left;
+                    }
+                } else {
+                    if (currentNode->right == NULL) {
+                        currentNode->right = createNode(data);
+                        break;
+                    } else {
+                        currentNode = currentNode->right;
+                    }
+                }
+            }
+        }
+    }
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Inorder Traversal: ");
+                inOrderTraversal(root);
+                printf("\n");
+                break;
+            case 2:
+                printf("Number of Leaf Nodes: %d\n", countLeafNodes(root));
+                break;
+            case 3:
+                printf("Mirror Image created.\n");
+                mirrorImage(root);
+                inOrderTraversal(root);
+                printf("\n");
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
+ 
+ 
+ 
+
+Write a Program to create a Binary Search Tree and perform following non-recursive operations on it. a. Preorder Traversal b. Display total Number of Nodes C. Display Leaf nodes.
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure of a binary tree node
+struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+// Structure of a stack node (used for non-recursive traversal)
+struct StackNode {
+    struct TreeNode* treeNode;
+    struct StackNode* next;
+};
+
+// Function to create a new tree node
+struct TreeNode* createNode(int data) {
+    struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to push a tree node onto the stack
+void push(struct StackNode** top, struct TreeNode* treeNode) {
+    struct StackNode* newNode = (struct StackNode*)malloc(sizeof(struct StackNode));
+    newNode->treeNode = treeNode;
+    newNode->next = *top;
+    *top = newNode;
+}
+
+// Function to pop a tree node from the stack
+struct TreeNode* pop(struct StackNode** top) {
+    if (*top == NULL)
+        return NULL;
+    struct TreeNode* poppedNode = (*top)->treeNode;
+    struct StackNode* temp = *top;
+    *top = (*top)->next;
+    free(temp);
+    return poppedNode;
+}
+
+// Function to perform preorder traversal iteratively
+void preOrderTraversal(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    struct StackNode* stack = NULL;
+    push(&stack, root);
+
+    while (stack) {
+        struct TreeNode* currNode = pop(&stack);
+        printf("%d ", currNode->data);
+
+        if (currNode->right)
+            push(&stack, currNode->right);
+        if (currNode->left)
+            push(&stack, currNode->left);
+    }
+}
+
+// Function to count the number of leaf nodes in the tree
+int countLeafNodes(struct TreeNode* root) {
+    if (root == NULL)
+        return 0;
+
+    int leafCount = 0;
+    struct StackNode* stack = NULL;
+    struct TreeNode* currNode = root;
+
+    while (currNode || stack) {
+        while (currNode) {
+            push(&stack, currNode);
+            currNode = currNode->left;
+        }
+        currNode = pop(&stack);
+        if (currNode->left == NULL && currNode->right == NULL)
+            leafCount++;
+        currNode = currNode->right;
+    }
+
+    return leafCount;
+}
+
+// Function to create the mirror image of the tree
+void mirrorImage(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    // Iteratively mirror the left and right subtrees using stack
+    struct StackNode* stack = NULL;
+    push(&stack, root);
+
+    while (stack) {
+        struct TreeNode* currNode = pop(&stack);
+        // Swap left and right children of the current node
+        struct TreeNode* temp = currNode->left;
+        currNode->left = currNode->right;
+        currNode->right = temp;
+
+        if (currNode->left)
+            push(&stack, currNode->left);
+        if (currNode->right)
+            push(&stack, currNode->right);
+    }
+}
+
+// Function to display the menu
+void displayMenu() {
+    printf("\nMenu:\n");
+    printf("1. Preorder Traversal\n");
+    printf("2. Display Number of Leaf Nodes\n");
+    printf("3. Mirror Image\n");
+    printf("4. Exit\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    struct TreeNode* root = NULL;
+    int choice, numElements, data;
+
+    // Input number of elements
+    printf("Enter the number of elements to insert: ");
+    scanf("%d", &numElements);
+
+    // Input values to create the binary tree
+    printf("Enter the elements to create the Binary Search Tree:\n");
+    for (int i = 0; i < numElements; i++) {
+        scanf("%d", &data);
+        if (root == NULL) {
+            root = createNode(data);
+        } else {
+            struct TreeNode* currentNode = root;
+            while (1) {
+                if (data < currentNode->data) {
+                    if (currentNode->left == NULL) {
+                        currentNode->left = createNode(data);
+                        break;
+                    } else {
+                        currentNode = currentNode->left;
+                    }
+                } else {
+                    if (currentNode->right == NULL) {
+                        currentNode->right = createNode(data);
+                        break;
+                    } else {
+                        currentNode = currentNode->right;
+                    }
+                }
+            }
+        }
+    }
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Preorder Traversal: ");
+                preOrderTraversal(root);
+                printf("\n");
+                break;
+            case 2:
+                printf("Number of Leaf Nodes: %d\n", countLeafNodes(root));
+                break;
+            case 3:
+                printf("Mirror Image created.\n");
+                mirrorImage(root);
+                preOrderTraversal(root);
+                printf("\n");
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+ 
+ 
+ 
+
+
+Write a Program to create a Binary Search Tree and perform deletion of a node from it. Also display the tree in nonrecursive postorder way.
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure of a binary tree node
+struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+// Structure of a stack node (used for non-recursive traversal)
+struct StackNode {
+    struct TreeNode* treeNode;
+    struct StackNode* next;
+};
+
+// Function to create a new tree node
+struct TreeNode* createNode(int data) {
+    struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to push a tree node onto the stack
+void push(struct StackNode** top, struct TreeNode* treeNode) {
+    struct StackNode* newNode = (struct StackNode*)malloc(sizeof(struct StackNode));
+    newNode->treeNode = treeNode;
+    newNode->next = *top;
+    *top = newNode;
+}
+
+// Function to pop a tree node from the stack
+struct TreeNode* pop(struct StackNode** top) {
+    if (*top == NULL)
+        return NULL;
+    struct TreeNode* poppedNode = (*top)->treeNode;
+    struct StackNode* temp = *top;
+    *top = (*top)->next;
+    free(temp);
+    return poppedNode;
+}
+
+// Function to perform postorder traversal iteratively
+void postOrderTraversal(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    struct StackNode* stack1 = NULL;
+    struct StackNode* stack2 = NULL;
+    push(&stack1, root);
+
+    while (stack1) {
+        struct TreeNode* currNode = pop(&stack1);
+        push(&stack2, currNode);
+
+        if (currNode->left)
+            push(&stack1, currNode->left);
+        if (currNode->right)
+            push(&stack1, currNode->right);
+    }
+
+    while (stack2) {
+        printf("%d ", pop(&stack2)->data);
+    }
+}
+
+// Function to insert a node into the BST
+struct TreeNode* insert(struct TreeNode* root, int data) {
+    if (root == NULL)
+        return createNode(data);
+
+    if (data < root->data)
+        root->left = insert(root->left, data);
+    else if (data > root->data)
+        root->right = insert(root->right, data);
+
+    return root;
+}
+
+// Function to find the minimum value node in a subtree
+struct TreeNode* minValueNode(struct TreeNode* node) {
+    struct TreeNode* current = node;
+
+    // Find the leftmost leaf node
+    while (current && current->left != NULL)
+        current = current->left;
+
+    return current;
+}
+
+// Function to delete a node from the BST
+struct TreeNode* deleteNode(struct TreeNode* root, int key) {
+    if (root == NULL)
+        return root;
+
+    // If the key to be deleted is smaller than the root's key, then it lies in the left subtree
+    if (key < root->data)
+        root->left = deleteNode(root->left, key);
+
+    // If the key to be deleted is greater than the root's key, then it lies in the right subtree
+    else if (key > root->data)
+        root->right = deleteNode(root->right, key);
+
+    // If the key is same as root's key, then this is the node to be deleted
+    else {
+        // Node with only one child or no child
+        if (root->left == NULL) {
+            struct TreeNode* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            struct TreeNode* temp = root->left;
+            free(root);
+            return temp;
+        }
+
+        // Node with two children: Get the inorder successor (smallest in the right subtree)
+        struct TreeNode* temp = minValueNode(root->right);
+
+        // Copy the inorder successor's content to this node
+        root->data = temp->data;
+
+        // Delete the inorder successor
+        root->right = deleteNode(root->right, temp->data);
+    }
+    return root;
+}
+
+// Function to display the menu
+void displayMenu() {
+    printf("\nMenu:\n");
+    printf("1. Insert Element\n");
+    printf("2. Delete Element\n");
+    printf("3. Display Postorder Traversal\n");
+    printf("4. Exit\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    struct TreeNode* root = NULL;
+    int choice, numElements, data, key;
+
+    // Input number of elements
+    printf("Enter the number of elements to insert: ");
+    scanf("%d", &numElements);
+
+    // Input values to create the binary search tree
+    printf("Enter the elements to create the Binary Search Tree:\n");
+    for (int i = 0; i < numElements; i++) {
+        scanf("%d", &data);
+        root = insert(root, data);
+    }
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter element to insert: ");
+                scanf("%d", &data);
+                root = insert(root, data);
+                break;
+            case 2:
+                printf("Enter element to delete: ");
+                scanf("%d", &key);
+                root = deleteNode(root, key);
+                break;
+            case 3:
+                printf("Postorder Traversal: ");
+                postOrderTraversal(root);
+                printf("\n");
+                break;
+            case 4:
+                exit (0);
+                break;
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+ 
+ 
+
+Write a Program to create a Binary Search Tree and display it levelwise. Also perform deletion of a node from it.
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure for a BST node
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+// Function to create a new BST node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert a node into the BST
+struct Node* insert(struct Node* root, int data) {
+    if (root == NULL)
+        return createNode(data);
+    if (data < root->data)
+        root->left = insert(root->left, data);
+    else if (data > root->data)
+        root->right = insert(root->right, data);
+    return root;
+}
+
+// Function to perform level-wise traversal of the BST
+void levelOrderTraversal(struct Node* root) {
+    if (root == NULL)
+        return;
+
+    struct Node* queue[100];
+    int front = 0, rear = 0;
+    queue[rear++] = root;
+
+    while (front < rear) {
+        struct Node* current = queue[front++];
+        printf("%d ", current->data);
+
+        if (current->left != NULL)
+            queue[rear++] = current->left;
+        if (current->right != NULL)
+            queue[rear++] = current->right;
+    }
+}
+
+// Function to find the node with minimum value in a BST
+struct Node* minValueNode(struct Node* node) {
+    struct Node* current = node;
+    while (current->left != NULL)
+        current = current->left;
+    return current;
+}
+
+// Function to delete a node from the BST
+struct Node* deleteNode(struct Node* root, int key) {
+    if (root == NULL)
+        return root;
+    if (key < root->data)
+        root->left = deleteNode(root->left, key);
+    else if (key > root->data)
+        root->right = deleteNode(root->right, key);
+    else {
+        if (root->left == NULL) {
+            struct Node* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            struct Node* temp = root->left;
+            free(root);
+            return temp;
+        }
+        struct Node* temp = minValueNode(root->right);
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->data);
+    }
+    return root;
+}
+
+// Function to display the menu
+void displayMenu() {
+    printf("\nMenu:\n");
+    printf("1. Create Binary Search Tree\n");
+    printf("2. Display BST Level-wise\n");
+    printf("3. Delete a element\n");
+    printf("4. Exit\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    struct Node* root = NULL;
+    int choice, numNodes, data, key;
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the number of elements: ");
+                scanf("%d", &numNodes);
+                printf("Enter the elements level-wise:\n");
+                for (int i = 0; i < numNodes; i++) {
+                    scanf("%d", &data);
+                    root = insert(root, data);
+                }
+                break;
+            case 2:
+                printf("Level-wise traversal of the BST: ");
+                levelOrderTraversal(root);
+                printf("\n");
+                break;
+            case 3:
+                printf("Enter the key to delete from the Binary Search Tree: ");
+                scanf("%d", &key);
+                root = deleteNode(root, key);
+                printf("Element with key %d deleted successfully.\n", key);
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
+ 
+ 
+ 
+
+Write a Program to create a Binary Search Tree and display its mirror image with and without disturbing the original tree. Also display height of a tree using nonrecursion.
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure for a BST node
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+// Structure for queue node (used for level order traversal)
+struct QueueNode {
+    struct Node* treeNode;
+    struct QueueNode* next;
+};
+
+// Function to create a new BST node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert an element into the BST
+struct Node* insert(struct Node* root, int data) {
+    if (root == NULL)
+        return createNode(data);
+    if (data < root->data)
+        root->left = insert(root->left, data);
+    else if (data > root->data)
+        root->right = insert(root->right, data);
+    return root;
+}
+
+// Function to perform inorder traversal of the BST
+void inorderTraversal(struct Node* root) {
+    if (root == NULL)
+        return;
+    inorderTraversal(root->left);
+    printf("%d ", root->data);
+    inorderTraversal(root->right);
+}
+
+// Function to create the mirror image of the BST without disturbing the original tree
+struct Node* mirrorImage(struct Node* root) {
+    if (root == NULL)
+        return NULL;
+
+    struct Node* mirror = createNode(root->data);
+    mirror->left = mirrorImage(root->right);
+    mirror->right = mirrorImage(root->left);
+    return mirror;
+}
+
+// Function to create the mirror image of the BST and update the original tree
+void mirrorAndUpdate(struct Node* root) {
+    if (root == NULL)
+        return;
+
+    struct Node* temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+
+    mirrorAndUpdate(root->left);
+    mirrorAndUpdate(root->right);
+}
+// Function to enqueue a tree node into the queue
+void enqueue(struct QueueNode** front, struct Node* treeNode) {
+    struct QueueNode* newNode = (struct QueueNode*)malloc(sizeof(struct QueueNode));
+    newNode->treeNode = treeNode;
+    newNode->next = NULL;
+    if (*front == NULL) {
+        *front = newNode;
+    } else {
+        struct QueueNode* rear = *front;
+        while (rear->next != NULL) {
+            rear = rear->next;
+        }
+        rear->next = newNode;
+    }
+}
+
+// Function to dequeue a tree node from the queue
+struct Node* dequeue(struct QueueNode** front) {
+    if (*front == NULL)
+        return NULL;
+    struct Node* dequeuedNode = (*front)->treeNode;
+    struct QueueNode* temp = *front;
+    *front = (*front)->next;
+    free(temp);
+    return dequeuedNode;
+}
+
+// Function to calculate the size of the queue
+int queueSize(struct QueueNode* front) {
+    int size = 0;
+    while (front) {
+        size++;
+        front = front->next;
+    }
+    return size;
+}
+// Function to calculate the height of the tree using level order traversal
+int heightNonRecursive(struct Node* root) {
+    if (root == NULL)
+        return 0;
+
+    struct QueueNode* queue = NULL;
+    enqueue(&queue, root);
+    int height = 0;
+
+    while (queue) {
+        int levelSize = queueSize(queue);
+        while (levelSize--) {
+            struct Node* currNode = dequeue(&queue);
+            if (currNode->left)
+                enqueue(&queue, currNode->left);
+            if (currNode->right)
+                enqueue(&queue, currNode->right);
+        }
+        height++;
+    }
+
+    return height;
+}
+// Function to display the menu
+void displayMenu() {
+    printf("\nMenu:\n");
+    printf("1. Create Binary Search Tree\n");
+    printf("2. Display BST\n");
+    printf("3. Display Mirror Image without Disturbing Original Tree\n");
+    printf("4. Display Mirror Image with Updating Original Tree\n");
+    printf("5. Calculate Height of the Tree (Non-Recursive)\n");
+    printf("6. Exit\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    struct Node* root = NULL;
+    int choice, numElements, data;
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the number of elements: ");
+                scanf("%d", &numElements);
+                printf("Enter the elements:\n");
+                for (int i = 0; i < numElements; i++) {
+                    scanf("%d", &data);
+                    root = insert(root, data);
+                }
+                break;
+            case 2:
+                printf("BST: ");
+                inorderTraversal(root);
+                printf("\n");
+                break;
+            case 3:
+                printf("Mirror Image without Disturbing Original Tree: ");
+                inorderTraversal(mirrorImage(root));
+                printf("\n");
+                break;
+            case 4:
+                printf("Mirror Image with Updating Original Tree\n");
+                mirrorAndUpdate(root);
+                printf("BST: ");
+                inorderTraversal(root);
+                printf("\n");
+                break;
+            case 5:
+                printf("Height of the Tree (Non-Recursive): %d\n", heightNonRecursive(root));
+                break;
+            case 6:
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+ 
+ 
+ 
+ 
+ 
+
